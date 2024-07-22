@@ -158,18 +158,22 @@ func (d Device) ForwardKill(localPort int) (err error) {
 }
 
 func (d Device) RunShellCommand(cmd string, args ...string) (string, error) {
-	raw, err := d.RunShellCommandWithBytes(cmd, args...)
+	raw, err := d.RunShellCommandWithBytes(cmd, args, false)
+	return string(raw), err
+}
+func (d Device) RunShellCommandAndForget(cmd string, args ...string) (string, error) {
+	raw, err := d.RunShellCommandWithBytes(cmd, args, true)
 	return string(raw), err
 }
 
-func (d Device) RunShellCommandWithBytes(cmd string, args ...string) ([]byte, error) {
+func (d Device) RunShellCommandWithBytes(cmd string, args []string, onlyVerify bool) ([]byte, error) {
 	if len(args) > 0 {
 		cmd = fmt.Sprintf("%s %s", cmd, strings.Join(args, " "))
 	}
 	if strings.TrimSpace(cmd) == "" {
 		return nil, errors.New("adb shell: command cannot be empty")
 	}
-	raw, err := d.executeCommand(fmt.Sprintf("shell:%s", cmd))
+	raw, err := d.executeCommand(fmt.Sprintf("shell:%s", cmd), onlyVerify)
 	return raw, err
 }
 
